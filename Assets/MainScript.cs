@@ -19,23 +19,29 @@ public class MainScript : MonoBehaviour
 
         LoadButton.onClick.AddListener(OnLoadClick);
         SaveButton.onClick.AddListener(OnSaveClick);
+        Save += SaveEventHandler;
     }
 
     void OnDestroy()
     {
         LoadButton.onClick.RemoveAllListeners();
         SaveButton.onClick.RemoveAllListeners();
+        Save -= SaveEventHandler;
     }
 
 
-    async void OnSaveClick()
+    event Action<string> Save;
+
+
+    void OnSaveClick()
     {
         try
         {
             message.text = "Saving...";
 
             var text = inputField.text;
-            await storage.Save(text);
+            Save?.Invoke(text);
+            Save?.Invoke(text);
 
             message.text = $"Saved ({DateTimeOffset.Now:T})";
         }
@@ -64,5 +70,10 @@ public class MainScript : MonoBehaviour
             message.text = ex.Message;
             return;
         }
+    }
+
+    async void SaveEventHandler(string text)
+    {
+        await storage.Save(text);
     }
 }
